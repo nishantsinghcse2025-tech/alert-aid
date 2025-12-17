@@ -41,6 +41,32 @@ import warnings
 import json
 from concurrent.futures import ThreadPoolExecutor
 import math
+import sentry_sdk
+from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.requests import RequestsIntegration
+
+# Initialize Sentry
+sentry_logging = LoggingIntegration(
+    level=logging.INFO,        # Capture info and above as breadcrumbs
+    event_level=logging.ERROR  # Send errors as events
+)
+
+if os.getenv("SENTRY_DSN"):
+    sentry_sdk.init(
+        dsn=os.getenv("SENTRY_DSN"),
+        release="alert-aid-backend-enhanced@1.0.0",
+        environment="production",
+        integrations=[
+            sentry_logging,
+            RequestsIntegration(),
+        ],
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+        enable_tracing=True,
+        _experiments={
+            "metrics_aggregator": True,
+        },
+    )
 
 # Suppress warnings for production
 warnings.filterwarnings('ignore')

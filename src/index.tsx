@@ -16,10 +16,15 @@ Sentry.init({
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),
     Sentry.browserProfilingIntegration(),
+    Sentry.feedbackIntegration({
+      colorScheme: "system",
+      isNameRequired: true,
+      isEmailRequired: true,
+    }),
   ],
   tracesSampleRate: 1.0,
   profilesSampleRate: 1.0,
-  replaysSessionSampleRate: 0.1,
+  replaysSessionSampleRate: 1.0, // Capture 100% of sessions
   replaysOnErrorSampleRate: 1.0,
   tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
 });

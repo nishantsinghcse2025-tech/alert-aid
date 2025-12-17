@@ -20,12 +20,23 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 import joblib
 import sentry_sdk
+from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.requests import RequestsIntegration
 
 # Initialize Sentry
+sentry_logging = LoggingIntegration(
+    level=logging.INFO,        # Capture info and above as breadcrumbs
+    event_level=logging.ERROR  # Send errors as events
+)
+
 sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN"),
     release="alert-aid-backend@1.0.0",
     environment="production",
+    integrations=[
+        sentry_logging,
+        RequestsIntegration(),
+    ],
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
     enable_tracing=True,

@@ -4,6 +4,22 @@ import numpy as np
 import pandas as pd
 import os
 from pathlib import Path
+import logging
+import sentry_sdk
+from sentry_sdk.integrations.logging import LoggingIntegration
+
+# Initialize Sentry for Streamlit
+if os.getenv("SENTRY_DSN"):
+    sentry_sdk.init(
+        dsn=os.getenv("SENTRY_DSN"),
+        release="alert-aid-streamlit@1.0.0",
+        environment="production",
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+        integrations=[
+            LoggingIntegration(level=logging.INFO, event_level=logging.ERROR)
+        ]
+    )
 
 # Set page config
 st.set_page_config(

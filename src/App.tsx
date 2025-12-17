@@ -21,6 +21,7 @@ import logger from './utils/logger';
 import { productionColors } from './styles/production-ui-system';
 // Import location override utility
 import './utils/locationOverride';
+import * as Sentry from "@sentry/react";
 
 // Skip to content link for accessibility
 const SkipToContent = styled.a`
@@ -83,15 +84,17 @@ const AppContent: React.FC = () => {
             window.location.href = `/${page === 'home' ? '' : page}`;
           }}
         />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/predictions" element={<PredictionsPage />} />
-          <Route path="/alerts" element={<AlertsPage />} />
-          <Route path="/evacuation" element={<EvacuationPage />} />
-          <Route path="/verify" element={<VerificationDashboard />} />
-        </Routes>
+        <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>} showDialog>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/predictions" element={<PredictionsPage />} />
+            <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/evacuation" element={<EvacuationPage />} />
+            <Route path="/verify" element={<VerificationDashboard />} />
+          </Routes>
+        </Sentry.ErrorBoundary>
       </div>
       
       {/* Location Permission Modal - Blocks dashboard until location is set */}
