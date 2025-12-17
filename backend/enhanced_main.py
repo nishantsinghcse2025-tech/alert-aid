@@ -80,6 +80,13 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+# Middleware for Sentry Profiling
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Document-Policy"] = "js-profiling"
+    return response
+
 # Enable CORS for frontend integration
 app.add_middleware(
     CORSMiddleware,
