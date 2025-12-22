@@ -9,6 +9,8 @@ import random
 import math
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
+import aiohttp
+import os
 
 router = APIRouter()
 
@@ -20,7 +22,124 @@ class PredictionInput(BaseModel):
     latitude: float = Field(..., description="Latitude coordinate")
     longitude: float = Field(..., description="Longitude coordinate")
 
+class LocationOnlyInput(BaseModel):
+    """Input model for location-only prediction (fetches weather automatically)"""
+    latitude: float = Field(..., description="Latitude coordinate")
+    longitude: float = Field(..., description="Longitude coordinate")
+    include_external_data: bool = Field(default=True, description="Include external weather data")
+
+
+# Frontend-compatible POST endpoint (fetches weather automatically)
 @router.post("/predict/disaster")
+async def predict_disaster_from_location(data: LocationOnlyInput):
+    """
+    Frontend-compatible disaster prediction - fetches weather data automatically
+    Accepts: latitude, longitude, include_external_data
+    Returns: overall_risk, risk_score, individual risks
+    """
+    try:
+        lat = data.latitude
+        lon = data.longitude
+        
+        # Fetch real weather data from OpenWeatherMap
+        api_key = os.getenv("OPENWEATHER_API_KEY", "1801423b3942e324ab80f5b47afe0859")
+        weather_url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
+        
+        temperature = 25.0
+        humidity = 60.0
+        wind_speed = 10.0
+        pressure = 1013.0
+        visibility = 10.0
+        is_real = False
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(weather_url, timeout=aiohttp.ClientTimeout(total=5)) as response:
+                    if response.status == 200:
+                        weather_data = await response.json()
+                        temperature = weather_data.get("main", {}).get("temp", 25.0)
+                        humidity = weather_data.get("main", {}).get("humidity", 60.0)
+                        wind_speed = weather_data.get("wind", {}).get("speed", 10.0) * 3.6  # m/s to km/h
+                        pressure = weather_data.get("main", {}).get("pressure", 1013.0)
+                        visibility = weather_data.get("visibility", 10000) / 1000  # m to km
+                        is_real = True
+                        print(f"✅ POST: Real weather data: {temperature}°C, {humidity}% humidity")
+        except Exception as e:
+            print(f"⚠️ POST: Could not fetch weather: {e}, using defaults")
+        
+        # Get predictions using the enhanced algorithm (returns list of dicts)
+        predictions = _enhanced_disaster_prediction(
+            temperature, humidity, wind_speed, pressure, lat, lon
+        )
+        
+        # Calculate overall risk score based on predictions
+        base_risk = 1.5  # Minimum baseline risk
+        
+        if predictions:
+            max_prob = max(p["probability"] for p in predictions)
+            avg_prob = sum(p["probability"] for p in predictions) / len(predictions)
+            calculated_risk = (max_prob * 0.6 + avg_prob * 0.4) * 10
+            risk_score = round(max(calculated_risk, base_risk), 1)
+        else:
+            risk_score = base_risk
+        
+        # Add modifiers for conditions
+        if humidity > 90:
+            risk_score += 1.0
+        elif humidity > 80:
+            risk_score += 0.5
+        if visibility < 5:
+            risk_score += 0.5
+        
+        risk_score = round(min(risk_score, 10.0), 1)
+        
+        # Determine overall risk category
+        if risk_score >= 7:
+            overall_risk = "critical"
+        elif risk_score >= 5:
+            overall_risk = "high"
+        elif risk_score >= 3:
+            overall_risk = "moderate"
+        else:
+            overall_risk = "low"
+        
+        # Calculate individual risk scores from predictions list
+        flood_risk = round(next((p["probability"] * 10 for p in predictions if p["type"] == "flood"), max(1.5, humidity / 40)), 1)
+        fire_risk = round(next((p["probability"] * 10 for p in predictions if p["type"] == "wildfire"), max(1.0, (100 - humidity) / 40)), 1)
+        earthquake_risk = round(next((p["probability"] * 10 for p in predictions if p["type"] == "earthquake"), 2.5), 1)
+        storm_risk = round(next((p["probability"] * 10 for p in predictions if p["type"] == "severe_weather"), max(1.5, wind_speed / 10)), 1)
+        
+        print(f"📊 POST Risk: {overall_risk}, Score: {risk_score}")
+        
+        return {
+            "overall_risk": overall_risk,
+            "risk_score": risk_score,
+            "flood_risk": min(flood_risk, 10.0),
+            "fire_risk": min(fire_risk, 10.0),
+            "earthquake_risk": min(earthquake_risk, 10.0),
+            "storm_risk": min(storm_risk, 10.0),
+            "confidence": 0.85,
+            "location_analyzed": {
+                "latitude": lat,
+                "longitude": lon
+            },
+            "weather_data": {
+                "temperature": temperature,
+                "humidity": humidity,
+                "wind_speed": wind_speed,
+                "pressure": pressure,
+                "visibility": visibility
+            },
+            "is_real": is_real,
+            "prediction_time": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        print(f"❌ POST prediction error: {e}")
+        raise HTTPException(status_code=500, detail=f"Prediction service error: {str(e)}")
+
+
+@router.post("/predict/disaster-full")
 async def predict_disaster(data: PredictionInput):
     """
     Enhanced disaster prediction using multiple factors
