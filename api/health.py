@@ -1,6 +1,6 @@
 """
-Alert Aid - API Index Endpoint
-Root endpoint for the API
+Alert Aid - Health Check Endpoint
+Simple health check for Vercel serverless function
 """
 
 from http.server import BaseHTTPRequestHandler
@@ -17,17 +17,15 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         
         response = {
-            "message": "Alert Aid API - Disaster Management System 🚀",
-            "status": "operational",
-            "version": "2.0.0-vercel",
+            "status": "healthy",
             "timestamp": datetime.now().isoformat(),
-            "endpoints": {
-                "health": "/api/health",
-                "weather": "/api/weather",
-                "predict": "/api/predict",
-                "alerts": "/api/alerts",
-                "earthquakes": "/api/earthquakes"
-            }
+            "services": {
+                "api": "operational",
+                "ml_model": "ready",
+                "external_apis": "connected"
+            },
+            "version": "2.0.0-vercel",
+            "platform": "vercel"
         }
         
         self.wfile.write(json.dumps(response).encode())
