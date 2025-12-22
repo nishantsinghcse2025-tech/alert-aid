@@ -1,19 +1,46 @@
 {
   "version": 2,
-  "framework": null,
-  "buildCommand": "npm run build",
-  "outputDirectory": "build",
-  "functions": {
-    "api/*.py": {
-      "runtime": "python3.11"
+  "builds": [
+    {
+      "src": "api/health.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/weather.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/predict.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/alerts.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/earthquakes.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
     }
-  },
-  "rewrites": [
-    { "source": "/api/health", "destination": "/api/health.py" },
-    { "source": "/api/weather/(.*)", "destination": "/api/weather.py" },
-    { "source": "/api/predict/(.*)", "destination": "/api/predict.py" },
-    { "source": "/api/alerts/(.*)", "destination": "/api/alerts.py" },
-    { "source": "/api/earthquakes", "destination": "/api/earthquakes.py" },
-    { "source": "/api", "destination": "/api/index.py" }
+  ],
+  "routes": [
+    { "src": "/api/health", "dest": "/api/health.py" },
+    { "src": "/api/weather/(.*)", "dest": "/api/weather.py" },
+    { "src": "/api/predict/(.*)", "dest": "/api/predict.py" },
+    { "src": "/api/alerts/(.*)", "dest": "/api/alerts.py" },
+    { "src": "/api/earthquakes", "dest": "/api/earthquakes.py" },
+    { "src": "/api/?$", "dest": "/api/index.py" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
