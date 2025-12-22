@@ -1,11 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "build",
-  "installCommand": "npm install",
   "builds": [
     {
-      "src": "api/index.py",
+      "src": "api/**/*.py",
       "use": "@vercel/python"
     },
     {
@@ -18,44 +15,40 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/api/health",
       "dest": "/api/index.py"
     },
     {
-      "src": "/(static/.*)",
-      "dest": "/$1"
+      "src": "/api/weather/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/api/predict/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/api/alerts/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/api/earthquakes",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/api/external-data",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/api",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
     },
     {
       "src": "/(.*)",
       "dest": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "*"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Document-Policy",
-          "value": "js-profiling"
-        }
-      ]
     }
   ]
 }
