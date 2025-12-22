@@ -44,6 +44,7 @@ def root():
         "endpoints": [
             "/api/health",
             "/api/weather/{lat}/{lon}",
+            "/api/weather/air-quality/{lat}/{lon}",
             "/api/predict/disaster-risk",
             "/api/alerts",
             "/api/alerts/active",
@@ -202,6 +203,84 @@ def get_weather(lat: float, lon: float):
             },
             "timestamp": datetime.now().isoformat()
         }
+
+
+def fetch_air_quality(lat: float, lon: float):
+    """Fetch air quality data from OpenWeatherMap Air Pollution API"""
+    url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}"
+    try:
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=10) as response:
+            return json.loads(response.read().decode()), True
+    except Exception as e:
+        return None, False
+
+
+@app.get("/api/weather/air-quality/{lat}/{lon}")
+def get_air_quality(lat: float, lon: float):
+    """Get Air Quality Index (AQI) data for specified coordinates"""
+    aqi_data, is_real = fetch_air_quality(lat, lon)
+    
+    aqi_categories = {
+        1: {"level": "Good", "color": "green", "description": "Air quality is satisfactory"},
+        2: {"level": "Fair", "color": "yellow", "description": "Air quality is acceptable"},
+        3: {"level": "Moderate", "color": "orange", "description": "Sensitive groups may experience health effects"},
+        4: {"level": "Poor", "color": "red", "description": "Health effects may be experienced by everyone"},
+        5: {"level": "Very Poor", "color": "purple", "description": "Health alert: everyone may experience serious effects"}
+    }
+    
+    if aqi_data and is_real:
+        try:
+            list_data = aqi_data.get("list", [{}])[0]
+            aqi_index = list_data.get("main", {}).get("aqi", 2)
+            components = list_data.get("components", {})
+            category = aqi_categories.get(aqi_index, aqi_categories[3])
+            
+            return {
+                "aqi": aqi_index,
+                "level": category["level"],
+                "color": category["color"],
+                "description": category["description"],
+                "components": {
+                    "pm2_5": round(components.get("pm2_5", 0), 2),
+                    "pm10": round(components.get("pm10", 0), 2),
+                    "no2": round(components.get("no2", 0), 2),
+                    "o3": round(components.get("o3", 0), 2),
+                    "so2": round(components.get("so2", 0), 2),
+                    "co": round(components.get("co", 0), 2)
+                },
+                "timestamp": datetime.now().isoformat(),
+                "location": {"latitude": lat, "longitude": lon},
+                "is_real": True
+            }
+        except Exception as e:
+            pass
+    
+    # Return fallback data
+    base_aqi = random.randint(1, 3)
+    if 20 <= abs(lat) <= 40:
+        base_aqi = min(base_aqi + 1, 5)
+    
+    category = aqi_categories[base_aqi]
+    pm2_5 = round(random.uniform(5, 150) if base_aqi >= 3 else random.uniform(0, 50), 2)
+    
+    return {
+        "aqi": base_aqi,
+        "level": category["level"],
+        "color": category["color"],
+        "description": category["description"],
+        "components": {
+            "pm2_5": pm2_5,
+            "pm10": round(pm2_5 * 1.5 + random.uniform(0, 20), 2),
+            "no2": round(random.uniform(10, 100), 2),
+            "o3": round(random.uniform(30, 120), 2),
+            "so2": round(random.uniform(5, 50), 2),
+            "co": round(random.uniform(200, 1000), 2)
+        },
+        "timestamp": datetime.now().isoformat(),
+        "location": {"latitude": lat, "longitude": lon},
+        "is_real": False
+    }
 
 
 @app.get("/api/predict/disaster-risk")
