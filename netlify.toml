@@ -2,6 +2,24 @@
   command = "npm run build"
   publish = "build"
 
+# Production branch
+[context.production]
+  command = "npm run build"
+
+# Deploy previews for all branches
+[context.deploy-preview]
+  command = "npm run build"
+
+# Branch-specific deploys
+[context.main]
+  command = "npm run build"
+
+[context.devloper]
+  command = "npm run build"
+
+[context.trial]
+  command = "npm run build"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -10,3 +28,4 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"
+  CI = "false"
