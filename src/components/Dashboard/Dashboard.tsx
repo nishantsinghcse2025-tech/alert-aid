@@ -147,6 +147,13 @@ const LeftSidebar = styled.aside`
   flex-direction: column;
   gap: ${enhancedGrid.cardGap}; /* 16px between cards - enhanced grid compliant */
   min-height: 0; /* Prevent flex overflow */
+  
+  /* Mobile-specific alignment */
+  @media (max-width: ${breakpoints.mobile}) {
+    gap: ${enhancedGrid.cardGap}; /* Consistent 16px gap on mobile */
+    padding: 0; /* Remove any padding for consistent alignment */
+    width: 100%;
+  }
 `;
 
 const CenterArea = styled.section`
@@ -158,6 +165,12 @@ const CenterArea = styled.section`
   justify-content: flex-start;
   min-height: 0;
   width: 100%;
+  
+  /* Mobile-specific alignment */
+  @media (max-width: ${breakpoints.mobile}) {
+    gap: ${enhancedGrid.cardGap}; /* Consistent 16px gap on mobile */
+    padding: 0; /* Remove any padding for consistent alignment */
+  }
 `;
 
 const RightSidebar = styled.aside`
@@ -166,6 +179,13 @@ const RightSidebar = styled.aside`
   flex-direction: column;
   gap: ${enhancedGrid.cardGap}; /* 16px between cards - enhanced grid compliant */
   min-height: 0;
+  
+  /* Mobile-specific alignment */
+  @media (max-width: ${breakpoints.mobile}) {
+    gap: ${enhancedGrid.cardGap}; /* Consistent 16px gap on mobile */
+    padding: 0; /* Remove any padding for consistent alignment */
+    width: 100%;
+  }
 `;
 
 // Remove the old VisualizationContainer as it's now integrated into GlobeRiskHero
@@ -222,6 +242,22 @@ const DashboardCard = styled.div<{ animationDelay?: number }>`
   /* Production text color */
   color: ${productionColors.text.primary};
   
+  /* Mobile-specific styling for consistent alignment */
+  @media (max-width: ${breakpoints.mobile}) {
+    padding: ${enhancedSpacing[4]}; /* 16px padding on mobile for consistent spacing */
+    margin: 0; /* Remove any margin to prevent misalignment */
+    width: 100%;
+    max-width: 100%;
+    
+    /* Ensure proper stacking on mobile */
+    display: flex;
+    flex-direction: column;
+    
+    &:hover {
+      transform: translateY(-2px); /* Reduced lift on mobile for better UX */
+    }
+  }
+  
   /* Subtle inner glow - enhanced */
   &::before {
     content: '';
@@ -241,6 +277,13 @@ const EmergencySection = styled.section`
   display: grid;
   grid-template-columns: 1fr;
   gap: ${spacing.lg}; /* 16px gap */
+  
+  /* Mobile-specific styling */
+  @media (max-width: ${breakpoints.mobile}) {
+    gap: ${enhancedGrid.cardGap}; /* Consistent 16px gap */
+    padding: 0;
+    margin: 0;
+  }
 `;
 
 const EvacuationSection = styled.section`
@@ -248,6 +291,13 @@ const EvacuationSection = styled.section`
   display: grid;
   grid-template-columns: 1fr;
   gap: ${spacing.lg};
+  
+  /* Mobile-specific styling */
+  @media (max-width: ${breakpoints.mobile}) {
+    gap: ${enhancedGrid.cardGap}; /* Consistent 16px gap */
+    padding: 0;
+    margin: 0;
+  }
 `;
 
 const ResourcesSection = styled.section`
@@ -255,10 +305,24 @@ const ResourcesSection = styled.section`
   display: grid;
   grid-template-columns: 1fr;
   gap: ${spacing.lg};
+  
+  /* Mobile-specific styling */
+  @media (max-width: ${breakpoints.mobile}) {
+    gap: ${enhancedGrid.cardGap}; /* Consistent 16px gap */
+    padding: 0;
+    margin: 0;
+  }
 `;
 
 const CommunicationSection = styled.section`
   grid-area: communication;
+  
+  /* Mobile-specific styling */
+  @media (max-width: ${breakpoints.mobile}) {
+    padding: 0;
+    margin: 0;
+  }
+`;
   display: grid;
   grid-template-columns: 1fr;
   gap: ${spacing.lg};
@@ -329,8 +393,6 @@ const Dashboard: React.FC = () => {
   const [aqiData, setAqiData] = useState<AQIData | null>(null);
   const [aqiLoading, setAqiLoading] = useState(false);
   
-  // Get location for hazard panels
-  const { currentLocation } = useLocation();
   const [aqiError, setAqiError] = useState<boolean>(false);
   
   // Ref for emergency section scroll
