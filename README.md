@@ -279,5 +279,55 @@ OpenStreetMap • OpenWeatherMap • NASA EONET • USGS
 🚨 **Stay Safe, Stay Prepared!**
 
 </div>
-This project is a simple web application made using HTML, CSS and JavaScript.
-It helps users to manage student data easily.
+# 🌍 Disaster Monitoring Dashboard
+
+This project is a web-based dashboard that displays real-time disaster and weather information using public APIs.
+It helps users to visualize natural events on a map in an easy and interactive way.
+
+---
+
+## 🚀 Features
+- Live disaster data visualization
+- Weather information using OpenWeatherMap API
+- Interactive maps with OpenStreetMap
+- User-friendly interface
+
+---
+
+## 🛠️ Technologies Used
+- HTML
+- CSS
+- JavaScript
+- OpenStreetMap API
+- OpenWeatherMap API
+- NASA EONET API
+
+---
+
+## 📂 How to Run the Project
+1. Clone the repository  
+2. Open `index.html` in any modern web browser  
+3. Make sure you have an active internet connection
+
+---
+
+## 📸 Screenshots
+_Add screenshots of the project here_
+
+---
+
+## 🔮 Future Improvements
+- Add user authentication
+- Improve UI/UX
+- Add more data sources
+
+---
+
+## 🙏 Acknowledgements
+OpenStreetMap · OpenWeatherMap · NASA EONET · USGS
+
+---
+
+## 👨‍💻 Author
+**Nishant Chaudhary**  
+B.Tech CSE (1st Year)
