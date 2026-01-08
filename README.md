@@ -279,3 +279,5 @@ OpenStreetMap • OpenWeatherMap • NASA EONET • USGS
 🚨 **Stay Safe, Stay Prepared!**
 
 </div>
+This project is a simple web application made using HTML, CSS and JavaScript.
+It helps users to manage student data easily.
